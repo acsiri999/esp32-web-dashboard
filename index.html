@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>建筑工地环境监测平台</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-block">
+      <span class="brand-orbit" aria-hidden="true"></span>
+      <div>
+        <h1>建筑工地环境监测平台</h1>
+        <p>ESP32 多传感器实时数据可视化系统</p>
+      </div>
+    </div>
+
+    <div class="top-status" aria-label="平台状态">
+      <span id="mqttStatus" class="status-pill status-connecting">MQTT 连接中</span>
+      <span id="firstBoardStatus" class="status-pill status-offline">第一块板 离线</span>
+      <span id="secondBoardStatus" class="status-pill status-offline">第二块板 离线</span>
+      <span id="currentTime" class="status-pill status-time">--</span>
+      <span id="globalLastUpdate" class="status-pill status-muted">最后更新 --</span>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="overview-grid" aria-label="平台运行概览">
+      <article class="overview-card">
+        <span class="overview-label">MQTT连接状态</span>
+        <strong id="mqttOverview">连接中</strong>
+      </article>
+      <article class="overview-card">
+        <span class="overview-label">当前在线设备</span>
+        <strong><span id="onlineDeviceCount">0</span><small>/2</small></strong>
+      </article>
+      <article class="overview-card">
+        <span class="overview-label">监测参数总数</span>
+        <strong id="metricCount">14</strong>
+      </article>
+      <article class="overview-card">
+        <span class="overview-label">当前数据更新时间</span>
+        <strong id="lastDataUpdate">--</strong>
+      </article>
+    </section>
+
+    <section class="topic-strip" aria-label="订阅信息">
+      <span>WebSocket：wss://broker.emqx.io:8084/mqtt</span>
+      <span>订阅 Topic：<strong id="topicText">first_board_backup / two_board_backup</strong></span>
+    </section>
+
+    <section class="device-section" aria-label="第一块ESP32环境数据">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">ESP32 BOARD 01</span>
+          <h2>第一块ESP32环境数据</h2>
+        </div>
+        <div class="section-meta">
+          <span id="firstSectionStatus" class="status-pill status-offline">离线</span>
+          <span id="firstBoardUpdate" class="status-note">最后更新：--</span>
+        </div>
+      </div>
+
+      <div class="data-grid">
+        <article class="data-card" data-key="temperature" data-icon="TEMP">
+          <span class="data-name">温度</span>
+          <strong><span id="temperatureValue">--</span><small>℃</small></strong>
+          <span class="source-tag">第一块板</span>
+        </article>
+        <article class="data-card" data-key="humidity" data-icon="RH">
+          <span class="data-name">湿度</span>
+          <strong><span id="humidityValue">--</span><small>%RH</small></strong>
+          <span class="source-tag">第一块板</span>
+        </article>
+        <article class="data-card" data-key="pm1_0" data-icon="PM">
+          <span class="data-name">PM1.0</span>
+          <strong><span id="pm1_0Value">--</span><small>μg/m³</small></strong>
+          <span class="source-tag">第一块板</span>
+        </article>
+        <article class="data-card" data-key="pm2_5" data-icon="PM">
+          <span class="data-name">PM2.5</span>
+          <strong><span id="pm2_5Value">--</span><small>μg/m³</small></strong>
+          <span class="source-tag">第一块板</span>
+        </article>
+        <article class="data-card" data-key="pm10" data-icon="PM">
+          <span class="data-name">PM10</span>
+          <strong><span id="pm10Value">--</span><small>μg/m³</small></strong>
+          <span class="source-tag">第一块板</span>
+        </article>
+        <article class="data-card" data-key="noise" data-icon="dB">
+          <span class="data-name">噪音</span>
+          <strong><span id="noiseValue">--</span><small>dB</small></strong>
+          <span id="noiseAlarm" class="alarm normal">正常</span>
+        </article>
+        <article class="data-card" data-key="co2" data-icon="CO2">
+          <span class="data-name">CO2</span>
+          <strong><span id="co2Value">--</span><small>ppm</small></strong>
+          <span id="co2Alarm" class="alarm normal">正常</span>
+        </article>
+        <article class="data-card" data-key="so2" data-icon="SO2">
+          <span class="data-name">SO2</span>
+          <strong><span id="so2Value">--</span><small>ppm</small></strong>
+          <span class="source-tag">第一块板</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="device-section" aria-label="第二块ESP32气体与氡气数据">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">ESP32 BOARD 02</span>
+          <h2>第二块ESP32气体与氡气数据</h2>
+        </div>
+        <div class="section-meta">
+          <span id="secondSectionStatus" class="status-pill status-offline">离线</span>
+          <span id="secondBoardUpdate" class="status-note">最后更新：--</span>
+        </div>
+      </div>
+
+      <div class="data-grid">
+        <article class="data-card" data-key="tvoc" data-icon="VOC">
+          <span class="data-name">TVOC</span>
+          <strong><span id="tvocValue">--</span><small>ppb</small></strong>
+          <span class="source-tag">第二块板</span>
+        </article>
+        <article class="data-card" data-key="eco2" data-icon="eCO2">
+          <span class="data-name">eCO2</span>
+          <strong><span id="eco2Value">--</span><small>ppm</small></strong>
+          <span class="source-tag">第二块板</span>
+        </article>
+        <article class="data-card" data-key="hcho_ppm" data-icon="HCHO">
+          <span class="data-name">甲醛</span>
+          <strong><span id="hcho_ppmValue">--</span><small>ppm</small></strong>
+          <span id="hcho_ppmAlarm" class="alarm normal">正常</span>
+        </article>
+        <article class="data-card" data-key="nh3" data-icon="NH3">
+          <span class="data-name">NH3</span>
+          <strong><span id="nh3Value">--</span><small>ppm</small></strong>
+          <span class="source-tag">第二块板</span>
+        </article>
+        <article class="data-card" data-key="radon_4h_bq_m3" data-icon="Rn">
+          <span class="data-name">氡气4小时均值</span>
+          <strong><span id="radon_4h_bq_m3Value">--</span><small>Bq/m³</small></strong>
+          <span class="source-tag">第二块板</span>
+        </article>
+        <article class="data-card" data-key="radon_24h_bq_m3" data-icon="Rn">
+          <span class="data-name">氡气24小时均值</span>
+          <strong><span id="radon_24h_bq_m3Value">--</span><small>Bq/m³</small></strong>
+          <span class="source-tag">第二块板</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="trend-section" aria-label="最近1小时趋势分析">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">TREND ANALYSIS</span>
+          <h2>最近1小时趋势分析</h2>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <article class="chart-card">
+          <div class="chart-header">
+            <h3>温湿度趋势</h3>
+            <div><span class="range-tag">最近1小时</span><span id="tempHumidityPoints" class="point-count">0点</span></div>
+          </div>
+          <div class="chart-box"><canvas id="tempHumidityChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header">
+            <h3>颗粒物趋势</h3>
+            <div><span class="range-tag">最近1小时</span><span id="particlePoints" class="point-count">0点</span></div>
+          </div>
+          <div class="chart-box"><canvas id="particleChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header">
+            <h3>CO2与eCO2趋势</h3>
+            <div><span class="range-tag">最近1小时</span><span id="co2Eco2Points" class="point-count">0点</span></div>
+          </div>
+          <div class="chart-box"><canvas id="co2Eco2Chart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header">
+            <h3>噪音趋势</h3>
+            <div><span class="range-tag">最近1小时</span><span id="noisePoints" class="point-count">0点</span></div>
+          </div>
+          <div class="chart-box"><canvas id="noiseChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header">
+            <h3>气体污染物趋势</h3>
+            <div><span class="range-tag">最近1小时</span><span id="gasPoints" class="point-count">0点</span></div>
+          </div>
+          <div class="chart-box"><canvas id="gasChart"></canvas></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header">
+            <h3>氡气浓度趋势</h3>
+            <div><span class="range-tag">最近1小时</span><span id="radonPoints" class="point-count">0点</span></div>
+          </div>
+          <div class="chart-box"><canvas id="radonChart"></canvas></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="system-footer">
+    <span>建筑工地环境监测平台</span>
+    <span>MQTT over WebSocket 实时数据链路</span>
+    <span>数据窗口：最近60分钟</span>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
