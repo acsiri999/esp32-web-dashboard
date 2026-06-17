@@ -17,7 +17,6 @@
         <p>ESP32 MULTI-SENSOR ENVIRONMENT MONITORING SYSTEM</p>
       </div>
     </div>
-
     <div class="top-status" aria-label="平台状态">
       <span id="mqttStatus" class="status-pill status-connecting">MQTT 连接中</span>
       <span id="firstBoardStatus" class="status-pill status-offline">第一块板 离线</span>
@@ -33,23 +32,40 @@
         <span class="section-kicker">SYSTEM OVERVIEW</span>
         <h2 id="overviewTitle">平台运行概览</h2>
       </div>
-
       <div class="overview-grid">
-        <article class="overview-card" data-stat-icon="NET">
-          <span class="overview-label">MQTT连接状态</span>
-          <strong id="mqttOverview">连接中</strong>
+        <article class="overview-card" data-stat-icon="NET"><span class="overview-label">MQTT连接状态</span><strong id="mqttOverview">连接中</strong></article>
+        <article class="overview-card" data-stat-icon="DEV"><span class="overview-label">在线设备数量</span><strong><span id="onlineDeviceCount">0</span><small>/2</small></strong></article>
+        <article class="overview-card" data-stat-icon="SNS"><span class="overview-label">监测参数数量</span><strong id="metricCount">14</strong></article>
+        <article class="overview-card" data-stat-icon="CLK"><span class="overview-label">最近数据更新时间</span><strong id="lastDataUpdate">--</strong></article>
+      </div>
+    </section>
+
+    <section class="quality-section panel-section" aria-labelledby="qualityTitle">
+      <div class="section-title">
+        <span class="section-kicker">QUALITY INDEX</span>
+        <h2 id="qualityTitle">综合环境质量评估</h2>
+      </div>
+      <div class="quality-grid">
+        <article class="quality-score-card">
+          <div class="score-ring" style="--score-deg:0deg;--score-color:#6f849e">
+            <div><strong id="qualityScore">--</strong><span>综合评分</span></div>
+          </div>
+          <div class="score-summary">
+            <span id="qualityLevel" class="level-badge level-none">等待数据</span>
+            <p>参与维度：<strong id="qualityDimensionCount">0</strong></p>
+            <p>数据覆盖率：<strong id="qualityCoverage">0%</strong></p>
+            <p class="quality-note">综合评分为项目自定义评价模型，仅用于监测状态辅助判断，不作为法定检测结论。</p>
+          </div>
         </article>
-        <article class="overview-card" data-stat-icon="DEV">
-          <span class="overview-label">在线设备数量</span>
-          <strong><span id="onlineDeviceCount">0</span><small>/2</small></strong>
+        <article class="dimension-card">
+          <h3>分项评分</h3>
+          <div id="dimensionScores" class="dimension-list"></div>
         </article>
-        <article class="overview-card" data-stat-icon="SNS">
-          <span class="overview-label">监测参数数量</span>
-          <strong id="metricCount">14</strong>
-        </article>
-        <article class="overview-card" data-stat-icon="CLK">
-          <span class="overview-label">最近数据更新时间</span>
-          <strong id="lastDataUpdate">--</strong>
+        <article class="risk-card">
+          <h3>风险提示</h3>
+          <div id="riskFactors" class="risk-list">
+            <p class="muted-text">等待实时数据接入</p>
+          </div>
         </article>
       </div>
     </section>
@@ -62,159 +78,45 @@
 
     <section id="firstDeviceSection" class="device-section" aria-labelledby="firstDeviceTitle">
       <div class="device-heading">
-        <div>
-          <span class="section-kicker">ESP32 BOARD 01</span>
-          <h2 id="firstDeviceTitle">第一块ESP32 · 环境与颗粒物监测</h2>
-          <p>温湿度、颗粒物、噪声及气体参数</p>
-        </div>
-        <div class="device-meta">
-          <span id="firstSectionStatus" class="status-pill status-offline">离线</span>
-          <span id="firstBoardUpdate" class="status-note">最后接收：--</span>
-          <span class="topic-badge">first_board_backup</span>
-        </div>
+        <div><span class="section-kicker">ESP32 BOARD 01</span><h2 id="firstDeviceTitle">第一块ESP32 · 环境与颗粒物监测</h2><p>温湿度、颗粒物、噪声及气体参数</p></div>
+        <div class="device-meta"><span id="firstSectionStatus" class="status-pill status-offline">离线</span><span id="firstBoardUpdate" class="status-note">最后接收：--</span><span class="topic-badge">first_board_backup</span></div>
       </div>
-
       <div class="data-grid">
-        <article class="data-card accent-temp" data-key="temperature">
-          <div class="card-top"><span class="data-name">温度</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="temperatureValue">--</span><small>℃</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-humidity" data-key="humidity">
-          <div class="card-top"><span class="data-name">湿度</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="humidityValue">--</span><small>%RH</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-particle" data-key="pm1_0">
-          <div class="card-top"><span class="data-name">PM1.0</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="pm1_0Value">--</span><small>μg/m³</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-particle" data-key="pm2_5">
-          <div class="card-top"><span class="data-name">PM2.5</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="pm2_5Value">--</span><small>μg/m³</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-particle" data-key="pm10">
-          <div class="card-top"><span class="data-name">PM10</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="pm10Value">--</span><small>μg/m³</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-noise" data-key="noise">
-          <div class="card-top"><span class="data-name">噪音</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="noiseValue">--</span><small>dB</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span id="noiseAlarm" class="alarm normal">正常</span></div>
-        </article>
-        <article class="data-card accent-co2" data-key="co2">
-          <div class="card-top"><span class="data-name">CO₂</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="co2Value">--</span><small>ppm</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span id="co2Alarm" class="alarm normal">正常</span></div>
-        </article>
-        <article class="data-card accent-so2" data-key="so2">
-          <div class="card-top"><span class="data-name">SO₂</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="so2Value">--</span><small>ppm</small></strong>
-          <div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div>
-        </article>
+        <article class="data-card accent-temp" data-key="temperature"><div class="card-top"><span class="data-name">温度</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="temperatureValue">--</span><small>℃</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-humidity" data-key="humidity"><div class="card-top"><span class="data-name">湿度</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="humidityValue">--</span><small>%RH</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-particle" data-key="pm1_0"><div class="card-top"><span class="data-name">PM1.0</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="pm1_0Value">--</span><small>μg/m³</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-particle" data-key="pm2_5"><div class="card-top"><span class="data-name">PM2.5</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="pm2_5Value">--</span><small>μg/m³</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-particle" data-key="pm10"><div class="card-top"><span class="data-name">PM10</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="pm10Value">--</span><small>μg/m³</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-noise" data-key="noise"><div class="card-top"><span class="data-name">噪音</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="noiseValue">--</span><small>dB</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span id="noiseAlarm" class="alarm normal">正常</span></div></article>
+        <article class="data-card accent-co2" data-key="co2"><div class="card-top"><span class="data-name">CO₂</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="co2Value">--</span><small>ppm</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span id="co2Alarm" class="alarm normal">正常</span></div></article>
+        <article class="data-card accent-so2" data-key="so2"><div class="card-top"><span class="data-name">SO₂</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="so2Value">--</span><small>ppm</small></strong><div class="card-foot"><span class="source-tag">第一块板</span><span class="state-tag muted">实时</span></div></article>
       </div>
     </section>
 
     <section id="secondDeviceSection" class="device-section" aria-labelledby="secondDeviceTitle">
       <div class="device-heading">
-        <div>
-          <span class="section-kicker">ESP32 BOARD 02</span>
-          <h2 id="secondDeviceTitle">第二块ESP32 · 气体与氡气监测</h2>
-          <p>挥发性气体、甲醛、氨气及氡气参数</p>
-        </div>
-        <div class="device-meta">
-          <span id="secondSectionStatus" class="status-pill status-offline">离线</span>
-          <span id="secondBoardUpdate" class="status-note">最后接收：--</span>
-          <span class="topic-badge">two_board_backup</span>
-        </div>
+        <div><span class="section-kicker">ESP32 BOARD 02</span><h2 id="secondDeviceTitle">第二块ESP32 · 气体与氡气监测</h2><p>挥发性气体、甲醛、氨气及氡气参数</p></div>
+        <div class="device-meta"><span id="secondSectionStatus" class="status-pill status-offline">离线</span><span id="secondBoardUpdate" class="status-note">最后接收：--</span><span class="topic-badge">two_board_backup</span></div>
       </div>
-
       <div class="data-grid">
-        <article class="data-card accent-tvoc" data-key="tvoc">
-          <div class="card-top"><span class="data-name">TVOC</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="tvocValue">--</span><small>ppb</small></strong>
-          <div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-co2" data-key="eco2">
-          <div class="card-top"><span class="data-name">eCO₂</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="eco2Value">--</span><small>ppm</small></strong>
-          <div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-hcho" data-key="hcho_ppm">
-          <div class="card-top"><span class="data-name">甲醛</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="hcho_ppmValue">--</span><small>ppm</small></strong>
-          <div class="card-foot"><span class="source-tag">第二块板</span><span id="hcho_ppmAlarm" class="alarm normal">正常</span></div>
-        </article>
-        <article class="data-card accent-nh3" data-key="nh3">
-          <div class="card-top"><span class="data-name">NH₃</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="nh3Value">--</span><small>ppm</small></strong>
-          <div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-radon" data-key="radon_4h_bq_m3">
-          <div class="card-top"><span class="data-name">氡气4小时均值</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="radon_4h_bq_m3Value">--</span><small>Bq/m³</small></strong>
-          <div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div>
-        </article>
-        <article class="data-card accent-radon" data-key="radon_24h_bq_m3">
-          <div class="card-top"><span class="data-name">氡气24小时均值</span><span class="sensor-icon" aria-hidden="true"></span></div>
-          <strong><span id="radon_24h_bq_m3Value">--</span><small>Bq/m³</small></strong>
-          <div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div>
-        </article>
+        <article class="data-card accent-tvoc" data-key="tvoc"><div class="card-top"><span class="data-name">TVOC</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="tvocValue">--</span><small>ppb</small></strong><div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-co2" data-key="eco2"><div class="card-top"><span class="data-name">eCO₂</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="eco2Value">--</span><small>ppm</small></strong><div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-hcho" data-key="hcho_ppm"><div class="card-top"><span class="data-name">甲醛</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="hcho_ppmValue">--</span><small>ppm</small></strong><div class="card-foot"><span class="source-tag">第二块板</span><span id="hcho_ppmAlarm" class="alarm normal">正常</span></div></article>
+        <article class="data-card accent-nh3" data-key="nh3"><div class="card-top"><span class="data-name">NH₃</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="nh3Value">--</span><small>ppm</small></strong><div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-radon" data-key="radon_4h_bq_m3"><div class="card-top"><span class="data-name">氡气4小时均值</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="radon_4h_bq_m3Value">--</span><small>Bq/m³</small></strong><div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div></article>
+        <article class="data-card accent-radon" data-key="radon_24h_bq_m3"><div class="card-top"><span class="data-name">氡气24小时均值</span><span class="sensor-icon" aria-hidden="true"></span></div><strong><span id="radon_24h_bq_m3Value">--</span><small>Bq/m³</small></strong><div class="card-foot"><span class="source-tag">第二块板</span><span class="state-tag muted">实时</span></div></article>
       </div>
     </section>
 
     <section class="trend-section" aria-labelledby="trendTitle">
-      <div class="section-title">
-        <span class="section-kicker">TREND ANALYSIS</span>
-        <h2 id="trendTitle">最近1小时趋势分析</h2>
-      </div>
-
+      <div class="section-title"><span class="section-kicker">TREND ANALYSIS</span><h2 id="trendTitle">最近1小时趋势分析</h2></div>
       <div class="charts-grid">
-        <article class="chart-card">
-          <div class="chart-header">
-            <div><h3>温湿度趋势</h3><p>温度与相对湿度实时变化</p></div>
-            <div class="chart-meta"><span class="range-tag">最近1小时</span><span id="tempHumidityPoints" class="point-count">0点</span></div>
-          </div>
-          <div class="chart-box"><canvas id="tempHumidityChart"></canvas><span id="tempHumidityEmpty" class="chart-empty">等待实时数据接入</span></div>
-        </article>
-        <article class="chart-card">
-          <div class="chart-header">
-            <div><h3>颗粒物趋势</h3><p>PM1.0 / PM2.5 / PM10 浓度</p></div>
-            <div class="chart-meta"><span class="range-tag">最近1小时</span><span id="particlePoints" class="point-count">0点</span></div>
-          </div>
-          <div class="chart-box"><canvas id="particleChart"></canvas><span id="particleEmpty" class="chart-empty">等待实时数据接入</span></div>
-        </article>
-        <article class="chart-card">
-          <div class="chart-header">
-            <div><h3>CO₂与eCO₂趋势</h3><p>空气质量核心碳指标</p></div>
-            <div class="chart-meta"><span class="range-tag">最近1小时</span><span id="co2Eco2Points" class="point-count">0点</span></div>
-          </div>
-          <div class="chart-box"><canvas id="co2Eco2Chart"></canvas><span id="co2Eco2Empty" class="chart-empty">等待实时数据接入</span></div>
-        </article>
-        <article class="chart-card">
-          <div class="chart-header">
-            <div><h3>噪音趋势</h3><p>现场噪声强度变化</p></div>
-            <div class="chart-meta"><span class="range-tag">最近1小时</span><span id="noisePoints" class="point-count">0点</span></div>
-          </div>
-          <div class="chart-box"><canvas id="noiseChart"></canvas><span id="noiseEmpty" class="chart-empty">等待实时数据接入</span></div>
-        </article>
-        <article class="chart-card">
-          <div class="chart-header">
-            <div><h3>气体污染物趋势</h3><p>SO₂ / TVOC / 甲醛 / NH₃</p></div>
-            <div class="chart-meta"><span class="range-tag">最近1小时</span><span id="gasPoints" class="point-count">0点</span></div>
-          </div>
-          <div class="chart-box"><canvas id="gasChart"></canvas><span id="gasEmpty" class="chart-empty">等待实时数据接入</span></div>
-        </article>
-        <article class="chart-card">
-          <div class="chart-header">
-            <div><h3>氡气浓度趋势</h3><p>4小时与24小时均值对比</p></div>
-            <div class="chart-meta"><span class="range-tag">最近1小时</span><span id="radonPoints" class="point-count">0点</span></div>
-          </div>
-          <div class="chart-box"><canvas id="radonChart"></canvas><span id="radonEmpty" class="chart-empty">等待实时数据接入</span></div>
-        </article>
+        <article class="chart-card"><div class="chart-header"><div><h3>温湿度趋势</h3><p>温度与相对湿度实时变化</p></div><div class="chart-meta"><span class="range-tag">最近1小时</span><span id="tempHumidityPoints" class="point-count">0点</span></div></div><div class="chart-box"><canvas id="tempHumidityChart"></canvas><span id="tempHumidityEmpty" class="chart-empty">等待实时数据接入</span></div></article>
+        <article class="chart-card"><div class="chart-header"><div><h3>颗粒物趋势</h3><p>PM1.0 / PM2.5 / PM10 浓度</p></div><div class="chart-meta"><span class="range-tag">最近1小时</span><span id="particlePoints" class="point-count">0点</span></div></div><div class="chart-box"><canvas id="particleChart"></canvas><span id="particleEmpty" class="chart-empty">等待实时数据接入</span></div></article>
+        <article class="chart-card"><div class="chart-header"><div><h3>CO₂与eCO₂趋势</h3><p>空气质量核心碳指标</p></div><div class="chart-meta"><span class="range-tag">最近1小时</span><span id="co2Eco2Points" class="point-count">0点</span></div></div><div class="chart-box"><canvas id="co2Eco2Chart"></canvas><span id="co2Eco2Empty" class="chart-empty">等待实时数据接入</span></div></article>
+        <article class="chart-card"><div class="chart-header"><div><h3>噪音趋势</h3><p>现场噪声强度变化</p></div><div class="chart-meta"><span class="range-tag">最近1小时</span><span id="noisePoints" class="point-count">0点</span></div></div><div class="chart-box"><canvas id="noiseChart"></canvas><span id="noiseEmpty" class="chart-empty">等待实时数据接入</span></div></article>
+        <article class="chart-card"><div class="chart-header"><div><h3>气体污染物趋势</h3><p>SO₂ / TVOC / 甲醛 / NH₃</p></div><div class="chart-meta"><span class="range-tag">最近1小时</span><span id="gasPoints" class="point-count">0点</span></div></div><div class="chart-box"><canvas id="gasChart"></canvas><span id="gasEmpty" class="chart-empty">等待实时数据接入</span></div></article>
+        <article class="chart-card"><div class="chart-header"><div><h3>氡气浓度趋势</h3><p>4小时与24小时均值对比</p></div><div class="chart-meta"><span class="range-tag">最近1小时</span><span id="radonPoints" class="point-count">0点</span></div></div><div class="chart-box"><canvas id="radonChart"></canvas><span id="radonEmpty" class="chart-empty">等待实时数据接入</span></div></article>
       </div>
     </section>
   </main>
