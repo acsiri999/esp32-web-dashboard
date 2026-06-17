@@ -81,6 +81,15 @@ const chartPointElements = {
   radonChart: document.getElementById("radonPoints")
 };
 
+const chartEmptyElements = {
+  tempHumidityChart: document.getElementById("tempHumidityEmpty"),
+  particleChart: document.getElementById("particleEmpty"),
+  co2Eco2Chart: document.getElementById("co2Eco2Empty"),
+  noiseChart: document.getElementById("noiseEmpty"),
+  gasChart: document.getElementById("gasEmpty"),
+  radonChart: document.getElementById("radonEmpty")
+};
+
 const elements = {
   mqttStatus: document.getElementById("mqttStatus"),
   mqttOverview: document.getElementById("mqttOverview"),
@@ -88,9 +97,12 @@ const elements = {
   firstBoardStatus: document.getElementById("firstBoardStatus"),
   firstSectionStatus: document.getElementById("firstSectionStatus"),
   firstBoardUpdate: document.getElementById("firstBoardUpdate"),
+  firstDeviceSection: document.getElementById("firstDeviceSection"),
   secondBoardStatus: document.getElementById("secondBoardStatus"),
   secondSectionStatus: document.getElementById("secondSectionStatus"),
   secondBoardUpdate: document.getElementById("secondBoardUpdate"),
+  secondDeviceSection: document.getElementById("secondDeviceSection"),
+  currentDate: document.getElementById("currentDate"),
   currentTime: document.getElementById("currentTime"),
   globalLastUpdate: document.getElementById("globalLastUpdate"),
   onlineDeviceCount: document.getElementById("onlineDeviceCount"),
@@ -105,6 +117,7 @@ const charts = createCharts();
 connectMqtt();
 startClock();
 updateOverview();
+updateChartPointCounts();
 
 function connectMqtt() {
   setMqttStatus("连接中", "connecting");
@@ -217,20 +230,21 @@ function updateCards(updates) {
 
     if (valueElement && config) {
       valueElement.textContent = formatSensorNumber(value, config.decimals);
+      restartClassAnimation(valueElement, "value-updated");
     }
   });
 
   updateAlarm("co2", state.latestData.co2, [
-    { level: "danger", value: 1500, text: "红色报警" },
-    { level: "warning", value: 1000, text: "黄色预警" }
+    { level: "danger", value: 1500, text: "报警" },
+    { level: "warning", value: 1000, text: "预警" }
   ]);
   updateAlarm("noise", state.latestData.noise, [
-    { level: "danger", value: 85, text: "红色报警" },
-    { level: "warning", value: 70, text: "黄色预警" }
+    { level: "danger", value: 85, text: "报警" },
+    { level: "warning", value: 70, text: "预警" }
   ]);
   updateAlarm("hcho_ppm", state.latestData.hcho_ppm, [
-    { level: "danger", value: 0.1, text: "红色报警" },
-    { level: "warning", value: 0.08, text: "黄色预警" }
+    { level: "danger", value: 0.1, text: "报警" },
+    { level: "warning", value: 0.08, text: "预警" }
   ]);
 }
 
@@ -337,10 +351,15 @@ function getEarliestChartTimestamp() {
 function updateChartPointCounts() {
   Object.entries(charts).forEach(([chartId, chart]) => {
     const count = chart.data.datasets.reduce((total, dataset) => total + dataset.data.length, 0);
-    const element = chartPointElements[chartId];
+    const countElement = chartPointElements[chartId];
+    const emptyElement = chartEmptyElements[chartId];
 
-    if (element) {
-      element.textContent = `${count}点`;
+    if (countElement) {
+      countElement.textContent = `${count}点`;
+    }
+
+    if (emptyElement) {
+      emptyElement.classList.toggle("hidden", count > 0);
     }
   });
 }
@@ -351,8 +370,8 @@ function createCharts() {
       type: "line",
       data: {
         datasets: [
-          createDataset("temperature", "温度", "#39d9ff", "rgba(57, 217, 255, 0.12)"),
-          createDataset("humidity", "湿度", "#7c8cff", "rgba(124, 140, 255, 0.1)")
+          createDataset("temperature", "温度", "#2f8cff", "rgba(47, 140, 255, 0.10)"),
+          createDataset("humidity", "湿度", "#21d4d8", "rgba(33, 212, 216, 0.09)")
         ]
       },
       options: baseChartOptions("数值")
@@ -361,9 +380,9 @@ function createCharts() {
       type: "line",
       data: {
         datasets: [
-          createDataset("pm1_0", "PM1.0", "#37f0b6", "rgba(55, 240, 182, 0.1)"),
-          createDataset("pm2_5", "PM2.5", "#39d9ff", "rgba(57, 217, 255, 0.1)"),
-          createDataset("pm10", "PM10", "#9d7cff", "rgba(157, 124, 255, 0.1)")
+          createDataset("pm1_0", "PM1.0", "#21d4d8", "rgba(33, 212, 216, 0.08)"),
+          createDataset("pm2_5", "PM2.5", "#7a6cff", "rgba(122, 108, 255, 0.08)"),
+          createDataset("pm10", "PM10", "#2f8cff", "rgba(47, 140, 255, 0.08)")
         ]
       },
       options: baseChartOptions("颗粒物浓度（μg/m³）")
@@ -372,8 +391,8 @@ function createCharts() {
       type: "line",
       data: {
         datasets: [
-          createDataset("co2", "CO2", "#37f0b6", "rgba(55, 240, 182, 0.1)"),
-          createDataset("eco2", "eCO2", "#ffb547", "rgba(255, 181, 71, 0.1)")
+          createDataset("co2", "CO₂", "#28d7a1", "rgba(40, 215, 161, 0.09)"),
+          createDataset("eco2", "eCO₂", "#ffb547", "rgba(255, 181, 71, 0.08)")
         ]
       },
       options: baseChartOptions("浓度（ppm）")
@@ -381,7 +400,7 @@ function createCharts() {
     noiseChart: new Chart(document.getElementById("noiseChart"), {
       type: "line",
       data: {
-        datasets: [createDataset("noise", "噪音", "#ff6b6b", "rgba(255, 107, 107, 0.1)")]
+        datasets: [createDataset("noise", "噪音", "#ff5d6c", "rgba(255, 93, 108, 0.08)")]
       },
       options: baseChartOptions("噪音（dB）")
     }),
@@ -389,10 +408,10 @@ function createCharts() {
       type: "line",
       data: {
         datasets: [
-          createDataset("so2", "SO2", "#9d7cff", "rgba(157, 124, 255, 0.1)"),
-          createDataset("tvoc", "TVOC", "#39d9ff", "rgba(57, 217, 255, 0.1)"),
-          createDataset("hcho_ppm", "甲醛", "#ff6b6b", "rgba(255, 107, 107, 0.1)"),
-          createDataset("nh3", "NH3", "#37f0b6", "rgba(55, 240, 182, 0.1)")
+          createDataset("so2", "SO₂", "#7a6cff", "rgba(122, 108, 255, 0.08)"),
+          createDataset("tvoc", "TVOC", "#21d4d8", "rgba(33, 212, 216, 0.08)"),
+          createDataset("hcho_ppm", "甲醛", "#ffb547", "rgba(255, 181, 71, 0.08)"),
+          createDataset("nh3", "NH₃", "#28d7a1", "rgba(40, 215, 161, 0.08)")
         ]
       },
       options: baseChartOptions("污染物浓度")
@@ -401,8 +420,8 @@ function createCharts() {
       type: "line",
       data: {
         datasets: [
-          createDataset("radon_4h_bq_m3", "氡气4小时均值", "#37f0b6", "rgba(55, 240, 182, 0.1)"),
-          createDataset("radon_24h_bq_m3", "氡气24小时均值", "#39d9ff", "rgba(57, 217, 255, 0.1)")
+          createDataset("radon_4h_bq_m3", "氡气4小时均值", "#7a6cff", "rgba(122, 108, 255, 0.09)"),
+          createDataset("radon_24h_bq_m3", "氡气24小时均值", "#2f8cff", "rgba(47, 140, 255, 0.09)")
         ]
       },
       options: baseChartOptions("氡气浓度（Bq/m³）")
@@ -419,13 +438,13 @@ function createDataset(key, label, color, fillColor) {
     backgroundColor: fillColor,
     borderWidth: 2,
     pointRadius(context) {
-      return context.dataset.data.length > 120 ? 0 : 2;
+      return context.dataset.data.length > 120 ? 0 : 1.8;
     },
     pointHoverRadius: 5,
     pointBackgroundColor: color,
-    pointBorderColor: "#071425",
+    pointBorderColor: "#071321",
     pointBorderWidth: 1,
-    tension: 0.28,
+    tension: 0.3,
     parsing: false,
     fill: true
   };
@@ -448,7 +467,8 @@ function baseChartOptions(yTitle) {
         labels: {
           usePointStyle: true,
           boxWidth: 8,
-          color: "#b9c7da",
+          color: "#b8c7dc",
+          padding: 14,
           font: {
             family: '"Microsoft YaHei", "Segoe UI", Arial, sans-serif'
           }
@@ -456,10 +476,12 @@ function baseChartOptions(yTitle) {
       },
       tooltip: {
         backgroundColor: "rgba(6, 16, 31, 0.94)",
-        titleColor: "#eaf6ff",
-        bodyColor: "#c7d7ea",
-        borderColor: "rgba(72, 196, 255, 0.35)",
+        titleColor: "#f4f8ff",
+        bodyColor: "#c8d5e6",
+        borderColor: "rgba(47, 140, 255, 0.45)",
         borderWidth: 1,
+        cornerRadius: 10,
+        displayColors: true,
         callbacks: {
           title(items) {
             if (!items.length) {
@@ -479,38 +501,38 @@ function baseChartOptions(yTitle) {
       x: {
         type: "linear",
         border: {
-          color: "rgba(120, 180, 255, 0.14)"
+          color: "rgba(130, 185, 255, 0.12)"
         },
         ticks: {
           maxRotation: 0,
           autoSkip: true,
-          color: "#8fa6bf",
+          color: "#91a8c4",
           callback(value) {
             return formatTime(new Date(value));
           }
         },
         grid: {
-          color: "rgba(120, 180, 255, 0.08)"
+          color: "rgba(130, 185, 255, 0.07)"
         }
       },
       y: {
         beginAtZero: false,
         border: {
-          color: "rgba(120, 180, 255, 0.14)"
+          color: "rgba(130, 185, 255, 0.12)"
         },
         title: {
           display: true,
           text: yTitle,
-          color: "#9fb3ca",
+          color: "#9fb2c9",
           font: {
             family: '"Microsoft YaHei", "Segoe UI", Arial, sans-serif'
           }
         },
         ticks: {
-          color: "#8fa6bf"
+          color: "#91a8c4"
         },
         grid: {
-          color: "rgba(120, 180, 255, 0.08)"
+          color: "rgba(130, 185, 255, 0.07)"
         }
       }
     }
@@ -529,12 +551,14 @@ function setDeviceOnline(deviceKey, date) {
   const headerStatus = deviceKey === "first" ? elements.firstBoardStatus : elements.secondBoardStatus;
   const sectionStatus = deviceKey === "first" ? elements.firstSectionStatus : elements.secondSectionStatus;
   const updateElement = deviceKey === "first" ? elements.firstBoardUpdate : elements.secondBoardUpdate;
+  const sectionElement = deviceKey === "first" ? elements.firstDeviceSection : elements.secondDeviceSection;
 
   device.online = true;
   device.lastUpdate = date;
   updateStatusPill(headerStatus, `${name} 在线`, "online");
   updateStatusPill(sectionStatus, "在线", "online");
-  updateElement.textContent = `最后更新：${formatDateTime(date)}`;
+  updateElement.textContent = `最后接收：${formatDateTime(date)}`;
+  sectionElement.classList.remove("device-offline");
 
   clearTimeout(device.timer);
   device.timer = setTimeout(() => setDeviceOffline(deviceKey), DEVICE_OFFLINE_TIMEOUT);
@@ -546,10 +570,12 @@ function setDeviceOffline(deviceKey) {
   const name = deviceKey === "first" ? "第一块板" : "第二块板";
   const headerStatus = deviceKey === "first" ? elements.firstBoardStatus : elements.secondBoardStatus;
   const sectionStatus = deviceKey === "first" ? elements.firstSectionStatus : elements.secondSectionStatus;
+  const sectionElement = deviceKey === "first" ? elements.firstDeviceSection : elements.secondDeviceSection;
 
   device.online = false;
   updateStatusPill(headerStatus, `${name} 离线`, "offline");
   updateStatusPill(sectionStatus, "离线", "offline");
+  sectionElement.classList.add("device-offline");
   updateOverview();
 }
 
@@ -573,7 +599,15 @@ function startClock() {
 }
 
 function updateClock() {
-  elements.currentTime.textContent = formatDateTime(new Date());
+  const now = new Date();
+  elements.currentDate.textContent = now.toLocaleDateString("zh-CN");
+  elements.currentTime.textContent = formatTime(now);
+}
+
+function restartClassAnimation(element, className) {
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
 }
 
 function formatSensorNumber(value, decimals) {
